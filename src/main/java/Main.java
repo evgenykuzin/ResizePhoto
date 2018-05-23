@@ -15,31 +15,31 @@ import java.util.Set;
 
 public class Main {
     public static void main(String[] args) throws IOException {
-        JFrame frame = new JFrame("Изменение размера картинки");
+        JFrame frame = new JFrame("Изменение размера картинок");
         frame.setVisible(true);
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.setLocationRelativeTo(null);
-        frame.setPreferredSize(new Dimension(400, 600));
+        frame.setPreferredSize(new Dimension(400, 500));
         frame.pack();
         frame.setResizable(false);
-        frame.setLocation(500,100);
+        frame.setLocation(500, 100);
         JPanel mainPanel = new JPanel();
         mainPanel.setBackground(Color.pink);
         mainPanel.setLayout(new FlowLayout());
         mainPanel.setSize(399, 399);
         JPanel wPanel = new JPanel();
-        wPanel.setBorder(new TitledBorder("Ширину на:"));
+        wPanel.setBorder(new TitledBorder("Изменить ширину на:"));
         wPanel.setLayout(new FlowLayout());
-        wPanel.setSize(100, 20);
+        wPanel.setPreferredSize(new Dimension(150, 50));
         JPanel hPanel = new JPanel();
-        hPanel.setBorder(new TitledBorder("Высоту на:"));
+        hPanel.setBorder(new TitledBorder("Изменить высоту на:"));
         hPanel.setLayout(new FlowLayout());
-        hPanel.setSize(100, 20);
+        hPanel.setPreferredSize(new Dimension(150, 50));
         JPanel pPanel = new JPanel();
-        pPanel.setBorder(new TitledBorder("Папка"));
+        pPanel.setBorder(new TitledBorder("Папка (скопируй и вставь путь)"));
         pPanel.setSize(300, 40);
-        TextField widthField = new TextField();
-        TextField heightField = new TextField();
+        TextField widthField = new TextField("400");
+        TextField heightField = new TextField("400");
         TextField pathField = new TextField("");
         widthField.setPreferredSize(new Dimension(100, 20));
         heightField.setPreferredSize(new Dimension(100, 20));
@@ -50,34 +50,35 @@ public class Main {
         mainPanel.add(pPanel);
         mainPanel.add(wPanel);
         mainPanel.add(hPanel);
-        TextArea messeges = new TextArea("Логи" + "\n" + "_________________________" + "\n");
-        messeges.setPreferredSize(new Dimension(300, 300));
+        TextArea messages = new TextArea("Loggs" + "\n" + "_________________________" + "\n");
+        messages.setPreferredSize(new Dimension(300, 300));
+        messages.setEditable(false);
         JButton button = new JButton("Изменить");
         button.addActionListener(e -> {
-            String path = pathField.getText();
+            messages.setText("Loggs" + "\n" + "_________________________" + "\n");
+            //messages.append("Loggs" + "\n" + "_________________________" + "\n");
+            String path = pathField.getText() + "/";
             if (path.equals("")) {
-                messeges.append("Введите адрес папки!");
+                messages.append("Введите адрес папки!");
                 throw new IllegalArgumentException("Empty pathField!");
             }
             int nWidth;
             int nHeight;
-            if (widthField.getText().equals("")){
+            if (widthField.getText().equals("")) {
                 nWidth = 0;
-            }
-            else {
+            } else {
                 nWidth = Integer.parseInt(widthField.getText());
             }
-            if(heightField.getText().equals("")){
+            if (heightField.getText().equals("")) {
                 nHeight = 0;
-            }
-            else {
+            } else {
                 nHeight = Integer.parseInt(heightField.getText());
             }
-            if (nWidth == 0 && nHeight == 0) messeges.append("Изменено: 0; заполните поля!" + "\n" );
+            if (nWidth == 0 && nHeight == 0) messages.append("Изменено: 0; заполните поля!" + "\n");
             File folder = new File(path);
             File[] listOfFiles = folder.listFiles();
             assert listOfFiles != null;
-            messeges.append("Найдено файлов: " + listOfFiles.length + "\n");
+            messages.append("Найдено файлов: " + listOfFiles.length + "\n");
             BufferedImage img = null;
             BufferedImage tempPNG = null;
             BufferedImage tempJPG = null;
@@ -85,35 +86,30 @@ public class Main {
             File newFileJPG = null;
             for (int i = 0; i < listOfFiles.length; i++) {
                 if (listOfFiles[i].isFile()) {
-                    messeges.append("_________________________" + "\n" + "File " + listOfFiles[i].getName() +
-                            "\n" );
+                    messages.append("_________________________" + "\n" + "File " + listOfFiles[i].getName() + "\n"
+                    + "Изменено" + "\n");
                     try {
                         img = ImageIO.read(new File(path + listOfFiles[i].getName()));
                     } catch (IOException e1) {
                         e1.printStackTrace();
-                        messeges.append(e1.getMessage() + "\n");
+                        messages.append(e1.getMessage() + "\n");
                     }
 
-                    if (Objects.requireNonNull(img).getWidth() < 700 || img.getHeight() < 700) {
-                        tempJPG = Resize.resizeImage(img, Objects.requireNonNull(img).getWidth(), img.getHeight(), nWidth, nHeight);
-                        newFileJPG = new File("C:\\Users\\evgen\\Desktop\\resizeTest\\" + listOfFiles[i].getName());
-                        try {
-                            ImageIO.write(tempJPG, "jpg", newFileJPG);
-                        } catch (IOException e1) {
-                            e1.printStackTrace();
-                            messeges.append(e1.getMessage() + "\n");
-                        }
-                    }
-                    else {
-                        messeges.append("не изменено" + "\n");
+                    tempJPG = Resize.resizeImage(img, Objects.requireNonNull(img).getWidth(), img.getHeight(), nWidth, nHeight);
+                    newFileJPG = new File(path + listOfFiles[i].getName());
+                    try {
+                        ImageIO.write(tempJPG, "jpg", newFileJPG);
+                    } catch (IOException e1) {
+                        e1.printStackTrace();
+                        messages.append(e1.getMessage() + "\n");
                     }
                 }
             }
-            messeges.append("_________________________" + "\n" + "DONE" + "\n");
+            messages.append("_________________________" + "\n" + "DONE" + "\n");
         });
         button.setPreferredSize(new Dimension(300, 50));
         mainPanel.add(button);
-        mainPanel.add(messeges);
+        mainPanel.add(messages);
         frame.add(mainPanel);
     }
 
